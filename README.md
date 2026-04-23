@@ -48,8 +48,10 @@ Creates a singleton-like guard service instance for your app process.
 - `stop()`: stop purge intervals
 - `await registerStrike({ ip?, req, reason, policy })`
 - `await registerFromRequest(req, reason, policy)`
-- `isIpBanned(ip)`
+- `isIpBanned(ip)`: helper for admin/monitoring checks
 - `snapshot()` returns `{ bans, watchlist, histories }`
+
+Ban enforcement is delegated to `iptables/nftables` through the configured rule client.
 
 ### Strike policy (`StrikePolicy`)
 
@@ -81,7 +83,7 @@ The POC runs inside Docker with:
 - `poc/src/index.ts`
 
 ```bash
-npm run poc:docker:up
+npm --prefix ./poc run docker:up
 ```
 
 Test flow:

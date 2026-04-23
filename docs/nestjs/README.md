@@ -1,6 +1,6 @@
 # NestJS integration
 
-## 1) Build a provider for the firewall service
+## 1) Build and initialize the firewall provider
 
 ```ts
 import { Provider } from "@nestjs/common";
@@ -36,6 +36,9 @@ export const FirewallGuardProvider: Provider = {
       purgeWatchlistIntervalSec: 30,
       purgeBansIntervalSec: 30,
       autoPurge: true,
+      onAudit: (event) => {
+        console.info("[FIREWALL_AUDIT]", event);
+      },
     });
 
     await firewall.init();
@@ -44,19 +47,9 @@ export const FirewallGuardProvider: Provider = {
 };
 ```
 
-## 2) Register provider in module
+Ban enforcement is handled by `iptables/nftables` rules managed by the service. Do not implement route-level ban decisions in your app layer.
 
-```ts
-import { Module } from "@nestjs/common";
-
-@Module({
-  providers: [FirewallGuardProvider],
-  exports: [FirewallGuardProvider],
-})
-export class FirewallModule {}
-```
-
-## 3) Use it in a guard/middleware/interceptor
+## 2) Register strikes from routes/middlewares
 
 ```ts
 import { Inject, Injectable, NestMiddleware } from "@nestjs/common";
@@ -81,7 +74,24 @@ export class SecurityStrikeMiddleware implements NestMiddleware {
 }
 ```
 
-## 4) Optional: expose snapshot endpoint
+## 3) Register provider and middleware in module
+
+```ts
+import { MiddlewareConsumer, Module, NestModule, RequestMethod } from "@nestjs/common";
+
+@Module({
+  providers: [FirewallGuardProvider, SecurityStrikeMiddleware, FirewallShutdown],
+  exports: [FirewallGuardProvider],
+  controllers: [FirewallController],
+})
+export class FirewallModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(SecurityStrikeMiddleware).forRoutes({ path: "*", method: RequestMethod.ALL });
+  }
+}
+```
+
+## 4) Expose snapshot endpoint
 
 ```ts
 import { Controller, Get, Inject } from "@nestjs/common";
@@ -116,9 +126,9 @@ export class FirewallShutdown implements OnApplicationShutdown {
 
 ## Docker note
 
-If Nest runs in Docker and you need real iptables rules:
+If you want real iptables writes from inside the API container, add:
 
-- install `iptables` in image
-- add `NET_ADMIN` and `NET_RAW`
+- `cap_add: [NET_ADMIN, NET_RAW]`
+- `iptables` binary in the image
 
-Otherwise run with `dryRun: true`.
+Without those, keep `dryRun: true`.

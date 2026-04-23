@@ -59,8 +59,8 @@ describe("firewall guard", () => {
 
     expect(rules.addCalls).toEqual(["195.7.8.9"]);
     expect(guard.isIpBanned("195.7.8.9")).toBe(true);
-
     const snapshot = guard.snapshot();
+    expect(snapshot.bans.active_bans["195.7.8.9"]?.ip).toBe("195.7.8.9");
     expect(snapshot.histories.entries["195.7.8.9"]?.total_offenses).toBe(1);
 
     guard.stop();
@@ -85,6 +85,7 @@ describe("firewall guard", () => {
 
     expect(rules.addCalls.length).toBe(0);
     expect(guard.isIpBanned("10.1.2.3")).toBe(false);
+    expect(guard.snapshot().bans.active_bans["10.1.2.3"]).toBeUndefined();
 
     guard.stop();
   });

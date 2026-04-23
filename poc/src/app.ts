@@ -1,5 +1,5 @@
+import { type FirewallGuard } from "@naskot/node-firewall-guard";
 import express, { type NextFunction, type Request, type Response } from "express";
-import { cleanRemoteIp, type FirewallGuard } from "../../src/index.js";
 
 export function createPocApp(firewall: FirewallGuard) {
   const app = express();
@@ -10,15 +10,11 @@ export function createPocApp(firewall: FirewallGuard) {
   });
 
   app.get("/protected", (req: Request, res: Response) => {
-    const forwarded = req.headers["x-forwarded-for"];
-    const source = typeof forwarded === "string" ? forwarded : (req.socket.remoteAddress ?? "");
-    const ip = cleanRemoteIp(source);
-
-    if (ip && firewall.isIpBanned(ip)) {
-      return res.status(403).json({ ok: false, error: `IP ${ip} is banned` });
-    }
-
-    return res.json({ ok: true, ip, message: "resource granted" });
+    return res.json({
+      ok: true,
+      ip: req.socket.remoteAddress ?? "",
+      message: "resource granted (enforcement handled by iptables/nftables)",
+    });
   });
 
   app.post("/strike", async (req: Request, res: Response, next: NextFunction) => {

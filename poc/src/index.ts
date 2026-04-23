@@ -1,9 +1,9 @@
 import { createPocApp } from "./app.js";
 import { POC_DRY_RUN, POC_IGNORE_IPS, POC_PORT } from "./config/env.js";
-import { createPocFirewallService } from "./services/firewall.service.js";
+import { firewall } from "./services/firewall.service.js";
 
 async function bootstrap() {
-  const firewall = await createPocFirewallService();
+  await firewall.init();
   const app = createPocApp(firewall);
 
   const server = app.listen(POC_PORT, () => {

@@ -42,6 +42,8 @@ const firewall = createFirewallGuard({
 await firewall.init();
 ```
 
+Ban enforcement is handled by `iptables/nftables` rules managed by the service. Do not implement route-level ban decisions in your app layer.
+
 ## 2) Register strikes from routes/middlewares
 
 ```ts
@@ -57,25 +59,7 @@ app.use(async (req, _res, next) => {
 });
 ```
 
-## 3) Block already-banned callers early
-
-```ts
-import { cleanRemoteIp } from "@naskot/node-firewall-guard";
-
-app.use((req, res, next) => {
-  const source =
-    typeof req.headers["x-forwarded-for"] === "string" ? req.headers["x-forwarded-for"] : (req.socket.remoteAddress ?? "");
-  const ip = cleanRemoteIp(source);
-
-  if (ip && firewall.isIpBanned(ip)) {
-    return res.status(403).json({ ok: false, error: `IP ${ip} is banned` });
-  }
-
-  next();
-});
-```
-
-## 4) Expose state for internal debugging
+## 3) Expose snapshot endpoint
 
 ```ts
 app.get("/internal/firewall/state", (_req, res) => {
@@ -83,7 +67,7 @@ app.get("/internal/firewall/state", (_req, res) => {
 });
 ```
 
-## 5) Shutdown
+## 4) Shutdown
 
 ```ts
 process.on("SIGTERM", () => firewall.stop());

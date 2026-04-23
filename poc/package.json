@@ -1,0 +1,21 @@
+{
+  "name": "@naskot/node-firewall-guard-poc",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node --import tsx ./src/index.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "docker:up": "docker compose -f ./docker-compose.yml up --build",
+    "docker:down": "docker compose -f ./docker-compose.yml down -v"
+  },
+  "dependencies": {
+    "@naskot/node-firewall-guard": "file:..",
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "@types/express": "^5.0.6",
+    "@types/node": "^22.19.17",
+    "tsx": "^4.19.4",
+    "typescript": "^5.8.3"
+  }
+}
