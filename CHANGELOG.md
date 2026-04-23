@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## [Unreleased] - yyyy-mm-dd
+## [1.0.0] - 2026-04-23
 
 - chore: bootstrap npm package metadata and TypeScript baseline (`package.json`, `tsconfig.json`, `src/index.ts`)
 - chore: install and configure ESLint and Prettier with lint/format scripts
