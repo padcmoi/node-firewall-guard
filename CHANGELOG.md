@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## [1.0.1] - 2026-04-23
+
+- fix: set `package.json.repository.url` to GitHub repository to satisfy npm provenance verification during publish
+
 ## [1.0.0] - 2026-04-23
 
 - chore: bootstrap npm package metadata and TypeScript baseline (`package.json`, `tsconfig.json`, `src/index.ts`)
