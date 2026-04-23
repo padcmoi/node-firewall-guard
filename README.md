@@ -1,12 +1,14 @@
 # node-firewall-guard
 
-Firewall guard toolkit for Node.js services running in Docker or on host.
+Firewall guard orchestrator for Node.js services running in Docker or on host.
+
+This library does not directly block requests in your app layer. It communicates with an external firewall software to issue ban/unban orders for IPs (built-in client: `iptables`).
 
 It provides a service that:
 
 - tracks strikes by IP
 - applies progressive bans
-- manages optional iptables drop/reject rules
+- sends drop/reject rule orders to external firewall software (`iptables` via the built-in client)
 - stores state (`watchlist`, `bans`, `histories`) in Redis or memory
 
 ## Install
