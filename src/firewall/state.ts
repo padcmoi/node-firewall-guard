@@ -16,8 +16,11 @@ export class FirewallState {
   private watchCache: WatchlistState = defaultWatchlist();
   private readonly histories: FirewallHistories;
 
-  constructor(private readonly store: NamespacedStore) {
-    this.histories = new FirewallHistories(store);
+  constructor(
+    private readonly store: NamespacedStore,
+    historiesTtlDays?: number
+  ) {
+    this.histories = new FirewallHistories(store, historiesTtlDays);
   }
 
   async init() {

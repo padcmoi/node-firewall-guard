@@ -8,6 +8,9 @@ export const POC_REDIS_PORT = Number(process.env.REDIS_PORT ?? 6379);
 export const POC_REDIS_USERNAME = process.env.REDIS_USERNAME ?? "default";
 export const POC_REDIS_PASSWORD = process.env.REDIS_PASSWORD ?? "change_me";
 
+const rawHistoriesTtlDays = process.env.FIREWALL_HISTORIES_TTL_DAYS?.trim();
+export const POC_HISTORIES_TTL_DAYS = rawHistoriesTtlDays ? Number(rawHistoriesTtlDays) : undefined;
+
 export const POC_IGNORE_IPS = (process.env.FIREWALL_IGNORE_IPS ?? "127.0.0.1,::1")
   .split(",")
   .map((value) => value.trim())

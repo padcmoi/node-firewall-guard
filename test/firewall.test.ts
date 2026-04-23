@@ -6,6 +6,7 @@ import {
   type FirewallRuleClient,
   type StrikePolicy,
 } from "../src/index.js";
+import type { KeyValueStore } from "../src/stores/types.js";
 
 class FakeRuleClient implements FirewallRuleClient {
   readonly addCalls: string[] = [];
@@ -19,6 +20,26 @@ class FakeRuleClient implements FirewallRuleClient {
   removeDropRule(rule: DropRule) {
     this.removeCalls.push(rule.ip);
     return Promise.resolve(true);
+  }
+}
+
+class TtlAwareStore implements KeyValueStore {
+  private readonly data = new Map<string, string>();
+  readonly setWithTtlCalls: Array<{ key: string; ttlSec: number }> = [];
+
+  get(key: string) {
+    return Promise.resolve(this.data.get(key) ?? null);
+  }
+
+  set(key: string, value: string) {
+    this.data.set(key, value);
+    return Promise.resolve();
+  }
+
+  setWithTtl(key: string, value: string, ttlSec: number) {
+    this.data.set(key, value);
+    this.setWithTtlCalls.push({ key, ttlSec });
+    return Promise.resolve();
   }
 }
 
@@ -86,6 +107,38 @@ describe("firewall guard", () => {
     expect(rules.addCalls.length).toBe(0);
     expect(guard.isIpBanned("10.1.2.3")).toBe(false);
     expect(guard.snapshot().bans.active_bans["10.1.2.3"]).toBeUndefined();
+
+    guard.stop();
+  });
+
+  it("refreshes histories TTL on each ban record when configured", async () => {
+    const store = new TtlAwareStore();
+    const rules = new FakeRuleClient();
+    const ttlDays = 7;
+    const expectedTtlSec = ttlDays * 24 * 60 * 60;
+
+    const guard = createFirewallGuard({
+      store,
+      namespace: "TEST_HISTORIES_TTL",
+      iptables: rules,
+      autoPurge: false,
+      historiesTtlDays: ttlDays,
+    });
+
+    await guard.init();
+
+    const ttlPolicy: StrikePolicy = {
+      firstThreshold: 1,
+      firstBanSec: 0,
+      watchlistSeconds: 300,
+    };
+
+    await guard.registerFromRequest(makeRequest("203.0.113.5"), "invalid-auth", ttlPolicy);
+    await guard.registerFromRequest(makeRequest("203.0.113.5"), "invalid-auth", ttlPolicy);
+
+    expect(store.setWithTtlCalls.length).toBe(2);
+    expect(store.setWithTtlCalls.every((call) => call.key === "TEST_HISTORIES_TTL:histories")).toBe(true);
+    expect(store.setWithTtlCalls.every((call) => call.ttlSec === expectedTtlSec)).toBe(true);
 
     guard.stop();
   });

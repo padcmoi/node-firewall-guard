@@ -11,6 +11,7 @@ export const firewall = createFirewallGuard({
   }),
   namespace: ENV.POC_NAMESPACE,
   ignoreIps: ENV.POC_IGNORE_IPS,
+  historiesTtlDays: ENV.POC_HISTORIES_TTL_DAYS,
   iptables: new IpTablesClient({
     dryRun: ENV.POC_DRY_RUN,
     ports: [ENV.POC_PORT],

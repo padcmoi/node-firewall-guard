@@ -47,6 +47,11 @@ export class RedisKeyValueStore implements KeyValueStore {
     await this.client.set(key, value);
   }
 
+  async setWithTtl(key: string, value: string, ttlSec: number) {
+    await this.ensureConnected();
+    await this.client.set(key, value, "EX", ttlSec);
+  }
+
   async del(key: string) {
     await this.ensureConnected();
     return this.client.del(key);

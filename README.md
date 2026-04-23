@@ -30,6 +30,7 @@ Creates a singleton-like guard service instance for your app process.
 - `iptablesOptions` (optional): used only when `iptables` is not provided
 - `purgeWatchlistIntervalSec` (optional, default: `30`)
 - `purgeBansIntervalSec` (optional, default: `30`)
+- `historiesTtlDays` (optional): TTL in days for `histories`; each new ban record refreshes the TTL (sliding expiration). If omitted, histories remains unlimited.
 - `autoPurge` (optional, default: `true`)
 - `onAudit` (optional): callback receiving security events
 

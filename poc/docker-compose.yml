@@ -32,7 +32,8 @@ services:
     environment:
       - PORT=3000
       - FIREWALL_DRY_RUN=1
-      - FIREWALL_NAMESPACE=
+      - FIREWALL_NAMESPACE=POC_FIREWALL
+      - FIREWALL_HISTORIES_TTL_DAYS=2
       - FIREWALL_IGNORE_IPS=127.0.0.1,::1
       - REDIS_HOST=redis
       - REDIS_PORT=6379

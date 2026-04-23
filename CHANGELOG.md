@@ -11,5 +11,6 @@
 - chore: add `poc/tsconfig.json` for editor-friendly POC typechecking
 - test: validate full checks (`npm run build`, `npm run lint`) with zero errors
 - test: validate POC ban flow end-to-end with Redis persistence and real iptables rule insertion when `FIREWALL_DRY_RUN=0`
+- feat: add optional `historiesTtlDays` (sliding TTL) to expire `histories` key and refresh countdown on each new ban record
 - qa: validate real host iptables ban/unban flow from POC via `curl` (including post-jail unban) and pass quality checks (`npm run lint`, `npm run typecheck`, `npm test`)
 - docs: clarify that firewall rules are applied in the container network namespace (not directly in host iptables)

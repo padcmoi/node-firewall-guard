@@ -18,6 +18,15 @@ export class NamespacedStore {
     return `${this.namespace}:${safe}`;
   }
 
+  private async persist(key: string, encoded: string, ttlSec?: number) {
+    if (ttlSec !== undefined && this.kv.setWithTtl) {
+      await this.kv.setWithTtl(key, encoded, ttlSec);
+      return;
+    }
+
+    await this.kv.set(key, encoded);
+  }
+
   async state<T>(name: string, opts?: { fallback?: () => T }) {
     const raw = await this.kv.get(this.key(name));
 
@@ -30,8 +39,8 @@ export class NamespacedStore {
     }
   }
 
-  async save<T>(name: string, value: T) {
-    await this.kv.set(this.key(name), jsonCodec<T>().encode(value));
+  async save<T>(name: string, value: T, opts?: { ttlSec?: number }) {
+    await this.persist(this.key(name), jsonCodec<T>().encode(value), opts?.ttlSec);
   }
 
   async delete(name: string) {
@@ -44,6 +53,7 @@ export class NamespacedStore {
     opts: {
       fallback: () => T;
       mutate: (current: T) => void | T | Promise<void | T>;
+      ttlSec?: number;
     }
   ) {
     const storeKey = this.key(name);
@@ -70,7 +80,7 @@ export class NamespacedStore {
         next = result;
       }
 
-      await this.kv.set(storeKey, jsonCodec<T>().encode(next));
+      await this.persist(storeKey, jsonCodec<T>().encode(next), opts.ttlSec);
       return next;
     });
 

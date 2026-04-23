@@ -13,5 +13,6 @@ export function jsonCodec<T>() {
 export interface KeyValueStore {
   get: (key: string) => Promise<string | null>;
   set: (key: string, value: string) => Promise<void>;
+  setWithTtl?: (key: string, value: string, ttlSec: number) => Promise<void>;
   del?: (key: string) => Promise<number>;
 }

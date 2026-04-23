@@ -15,6 +15,7 @@ export interface FirewallGuardOptions {
   iptablesOptions?: IpTablesClientOptions;
   purgeWatchlistIntervalSec?: number;
   purgeBansIntervalSec?: number;
+  historiesTtlDays?: number;
   autoPurge?: boolean;
   onAudit?: (event: SecurityAuditEvent) => void;
 }
@@ -37,7 +38,7 @@ export function createFirewallGuard(options: FirewallGuardOptions) {
   const ignoreIps = options.ignoreIps ?? ["127.0.0.1", "::1"];
 
   const namespacedStore = new NamespacedStore(options.store, namespace);
-  const state = new FirewallState(namespacedStore);
+  const state = new FirewallState(namespacedStore, options.historiesTtlDays);
 
   const ruleClient =
     options.iptables ??

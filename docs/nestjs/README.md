@@ -35,6 +35,7 @@ export const FirewallGuardProvider: Provider = {
       }),
       purgeWatchlistIntervalSec: 30,
       purgeBansIntervalSec: 30,
+      historiesTtlDays: process.env.FIREWALL_HISTORIES_TTL_DAYS ? Number(process.env.FIREWALL_HISTORIES_TTL_DAYS) : undefined,
       autoPurge: true,
       onAudit: (event) => {
         console.info("[FIREWALL_AUDIT]", event);
@@ -46,6 +47,8 @@ export const FirewallGuardProvider: Provider = {
   },
 };
 ```
+
+`FIREWALL_HISTORIES_TTL_DAYS` is optional. If unset, `histories` remains unlimited.
 
 Ban enforcement is handled by `iptables/nftables` rules managed by the service. Do not implement route-level ban decisions in your app layer.
 
