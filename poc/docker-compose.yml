@@ -1,0 +1,45 @@
+services:
+  redis:
+    image: redis:7.4-alpine
+    container_name: hmac-lab-redis
+    command: ["redis-server", "/usr/local/etc/redis/redis.conf"]
+    volumes:
+      - redis_data:/data
+      - ./redis/redis.conf:/usr/local/etc/redis/redis.conf:ro
+      - ./redis/users.acl:/usr/local/etc/redis/users.acl:ro
+    healthcheck:
+      test: ["CMD", "redis-cli", "--user", "user", "-a", "password", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 20
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+
+  firewall-poc:
+    build:
+      context: ..
+      dockerfile: poc/Dockerfile
+    container_name: node-firewall-guard-poc
+    depends_on:
+      redis:
+        condition: service_healthy
+    cap_add:
+      - NET_ADMIN
+      - NET_RAW
+    ports:
+      - "3310:3000"
+    environment:
+      - PORT=3000
+      - FIREWALL_DRY_RUN=1
+      - FIREWALL_NAMESPACE=POC_FIREWALL
+      - FIREWALL_HISTORIES_TTL_DAYS=2
+      - FIREWALL_IGNORE_IPS=127.0.0.1,::1
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_USERNAME=user
+      - REDIS_PASSWORD=password
+    restart: unless-stopped
+
+volumes:
+  redis_data:
