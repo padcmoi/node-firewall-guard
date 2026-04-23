@@ -1,8 +1,12 @@
 {
   "name": "@naskot/node-firewall-guard",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Firewall guard toolkit for Node.js services running in Docker or on host",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/padcmoi/node-firewall-guard"
+  },
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
